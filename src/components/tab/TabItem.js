@@ -6,7 +6,7 @@ function TabItem(props) {
   return (
     <div
       className={`tab-item ${props.active ? 'active' : ''}`.trimEnd()}
-      onClick={props.onClick}
+      onMouseDown={props.onClick}
     >
       <div className='tab-item__content'>
         <div className='tab-item__title'>{props.children}</div>

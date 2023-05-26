@@ -7,10 +7,15 @@
   .tab {
     display: flex;
     background-color: #efc0b8;
-    padding: 10px 10px 0 100px;
+    padding: 10px 10px 0 10px;
     font-size: 14px;
     max-width: 85%;
     min-height: 36.5px;
+    transition: padding-left 0.3s ease-in-out;
+
+    &.min-screen {
+      padding-left: 100px;
+    }
   }
 
   .tool-bar {

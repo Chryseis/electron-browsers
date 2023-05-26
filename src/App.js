@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Tabs from './components/tab';
 
 const initialItems = [
@@ -32,6 +32,17 @@ const initialItems = [
 function App() {
   const [activeKey, setActiveKey] = useState('1');
   const [items, setItems] = useState(initialItems);
+  const [fullscreen, setFullscreen] = useState(false);
+
+  useEffect(() => {
+    window.bridge.onEnterFullScreen(() => {
+      setFullscreen(true);
+    });
+
+    window.bridge.onLeaveFullScreen(() => {
+      setFullscreen(false);
+    });
+  }, []);
 
   const addTab = () => {
     const newKey = (Number(items[items.length - 1]?.key || 0) + 1).toString();
@@ -58,12 +69,14 @@ function App() {
     }
   };
 
-  const onChange = key => {
+  const onChange = (event, key) => {
+    event.stopPropagation();
     setActiveKey(key);
   };
 
   return (
     <Tabs
+      fullscreen={fullscreen}
       items={items}
       add={addTab}
       remove={removeTab}
