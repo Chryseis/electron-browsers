@@ -1,9 +1,9 @@
 // ./public/electron.js
 const path = require('path');
 
-const { app, BrowserWindow, BrowserView } = require('electron');
-const isDev = require('electron-is-dev');
-const store = require('./store');
+const { app, BrowserWindow } = require('electron');
+const TabHeader = require('./tabHeader');
+const Tabs = require('./tabs');
 
 async function createWindow() {
   const win = new BrowserWindow({
@@ -17,36 +17,11 @@ async function createWindow() {
     }
   });
 
-  await win.loadURL(
-    isDev
-      ? 'http://localhost:3000'
-      : `file://${path.join(__dirname, '../build/index.html')}`
-  );
+  const tabHeader = new TabHeader(win);
 
-  win.on('enter-full-screen', () => {
-    win.webContents.send('enter-full-screen');
-  });
+  await tabHeader.createTabHeader();
 
-  win.on('leave-full-screen', () => {
-    win.webContents.send('leave-full-screen');
-  });
-
-  win.webContents.ipc.on('window-move', (event, { offsetX, offsetY }) => {
-    const currentPosition = win.getPosition();
-    const [currentX, currentY] = currentPosition;
-    win.setPosition(currentX + offsetX, currentY + offsetY);
-  });
-
-  win.webContents.ipc.on('add-tab', () => {});
-
-  win.webContents.ipc.on('remove-tab', () => {});
-
-  win.webContents.ipc.on('select-tab', () => {});
-
-  // Open the DevTools.
-  if (isDev) {
-    win.webContents.openDevTools({ mode: 'detach' });
-  }
+  const tabs = new Tabs(win);
 }
 
 app.whenReady().then(createWindow);

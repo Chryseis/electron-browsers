@@ -4,15 +4,7 @@ const CracoLessPlugin = require('craco-less');
 module.exports = {
   plugins: [
     {
-      plugin: CracoLessPlugin,
-      options: {
-        lessLoaderOptions: {
-          lessOptions: {
-            modifyVars: { '@primary-color': '#93C5FD' },
-            javascriptEnabled: true
-          }
-        }
-      }
+      plugin: CracoLessPlugin
     }
   ],
   webpack: {
