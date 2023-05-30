@@ -5,7 +5,7 @@ const isDev = require('electron-is-dev');
 
 const STORE_KEY = 'tabList';
 
-class Tabs {
+class TabContent {
   constructor(win) {
     this.win = win;
     this.tabHeight = 50;
@@ -90,4 +90,4 @@ class Tabs {
   }
 }
 
-module.exports = Tabs;
+module.exports = TabContent;

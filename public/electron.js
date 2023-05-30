@@ -3,7 +3,7 @@ const path = require('path');
 
 const { app, BrowserWindow } = require('electron');
 const TabHeader = require('./tabHeader');
-const Tabs = require('./tabs');
+const TabContent = require('./tabContent');
 
 async function createWindow() {
   const win = new BrowserWindow({
@@ -21,7 +21,7 @@ async function createWindow() {
 
   await tabHeader.createTabHeader();
 
-  const tabs = new Tabs(win);
+  const tabContent = new TabContent(win);
 }
 
 app.whenReady().then(createWindow);
