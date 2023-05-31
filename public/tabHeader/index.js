@@ -16,7 +16,6 @@ class TabHeader {
     const view = new BrowserView({
       webPreferences: {
         nodeIntegration: true,
-        partition: `persist:partition_${+new Date()}`,
         preload: path.join(__dirname, 'preload.js')
       }
     });

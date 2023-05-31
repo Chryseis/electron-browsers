@@ -1,5 +1,5 @@
 import { ConfigProvider } from 'antd';
-import BrowserHeader from 'src/pages/browserHeader';
+import Container from './router';
 
 function App() {
   return (
@@ -10,7 +10,7 @@ function App() {
         }
       }}
     >
-      <BrowserHeader />
+      <Container />
     </ConfigProvider>
   );
 }
