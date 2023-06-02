@@ -12,6 +12,7 @@
     "electron": "24.0.0",
     "electron-is-dev": "^2.0.0",
     "electron-store": "^8.1.0",
+    "eslint": "8.22.0",
     "prop-types": "^15.8.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
@@ -27,12 +28,6 @@
     "electron": "wait-on tcp:3000 && electron .",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
-  },
-  "eslintConfig": {
-    "extends": [
-      "react-app",
-      "react-app/jest"
-    ]
   },
   "browserslist": {
     "production": [
@@ -51,6 +46,7 @@
     "concurrently": "^8.0.1",
     "craco-less": "^2.0.0",
     "electron-builder": "^23.6.0",
+    "eslint-config-react-app": "^7.0.1",
     "nodemon": "^2.0.22",
     "prettier": "^2.8.8",
     "wait-on": "^7.0.1"

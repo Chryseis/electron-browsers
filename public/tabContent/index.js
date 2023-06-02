@@ -1,7 +1,8 @@
 const path = require('path');
-const { BrowserView, ipcMain } = require('electron');
+const { ipcMain } = require('electron');
 const store = require('../store');
 const isDev = require('electron-is-dev');
+const createBrowserView = require('../shared/createBrowserView');
 
 const STORE_KEY = 'tabList';
 
@@ -9,6 +10,7 @@ class TabContent {
   constructor(win) {
     this.win = win;
     this.tabHeight = 50;
+    this.searchBarHeight = 41;
     ipcMain.on('add-tab', (event, url) => this.addTab(url));
     ipcMain.on('remove-tab', (event, tabKey) => {
       this.removeTab(tabKey);
@@ -18,39 +20,28 @@ class TabContent {
     });
   }
 
-  async addTab(url) {
-    const [width, height] = this.win.getSize();
-    const view = new BrowserView({
-      webPreferences: {
-        nodeIntegration: true,
-        partition: `persist:partition_${+new Date()}`,
-        preload: path.join(__dirname, 'preload.js')
-      }
-    });
-    view.setAutoResize({ width: true, height: true });
-    await view.webContents.loadURL(url);
-    const viewId = view.webContents.id;
-    const title = view.webContents.getTitle();
-    this.win.addBrowserView(view);
+  async addTab() {
+    const searchView = await this.#createSearchView();
+
+    const contentView = await this.#createContentView();
+
+    const title = '新标签页';
+
     const tabList = store.get(STORE_KEY) || [];
-    tabList.push({ key: viewId, label: title });
+    tabList.push({
+      key: contentView.webContents.id,
+      sKey: searchView.webContents.id,
+      label: title
+    });
     store.set(
       STORE_KEY,
       tabList.map((o, i) => {
         return { ...o, active: i === tabList.length - 1 };
       })
     );
-    view.setBounds({
-      x: 0,
-      y: this.tabHeight,
-      width,
-      height: height - this.tabHeight
-    });
-
-    if (isDev) {
-      view.webContents.openDevTools({ mode: 'bottom' });
-    }
   }
+
+  urlChange(tabKey, url) {}
 
   removeTab(tabKey) {
     const restTabList = store.get(STORE_KEY).filter(o => o.key !== tabKey);
@@ -87,6 +78,64 @@ class TabContent {
     this.win.setTopBrowserView(view);
 
     store.set(STORE_KEY, tabList);
+  }
+
+  async #createSearchView() {
+    const [width, height] = this.win.getSize();
+
+    const view = createBrowserView({
+      webPreferences: {
+        nodeIntegration: true
+      }
+    });
+
+    await view.webContents.loadURL(
+      isDev
+        ? 'http://localhost:3000/#/search-bar'
+        : `file://${path.join(__dirname, '../build/index.html/#/search-bar')}`
+    );
+
+    this.win.addBrowserView(view);
+
+    view.setBounds({
+      x: 0,
+      y: this.tabHeight,
+      width,
+      height: height - this.tabHeight
+    });
+
+    return view;
+  }
+
+  async #createContentView() {
+    const [width, height] = this.win.getSize();
+
+    const view = createBrowserView({
+      webPreferences: {
+        nodeIntegration: true,
+        partition: `persist:partition_${+new Date()}`,
+        preload: path.join(__dirname, 'preload.js')
+      }
+    });
+    await view.webContents.loadURL(
+      isDev
+        ? 'http://localhost:3000/#/blank'
+        : `file://${path.join(__dirname, '../build/index.html/#/blank')}`
+    );
+    this.win.addBrowserView(view);
+
+    view.setBounds({
+      x: 0,
+      y: this.tabHeight + this.searchBarHeight,
+      width,
+      height: height - this.tabHeight - this.searchBarHeight
+    });
+
+    if (isDev) {
+      view.webContents.openDevTools({ mode: 'bottom' });
+    }
+
+    return view;
   }
 }
 

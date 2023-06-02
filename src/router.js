@@ -7,9 +7,9 @@ function Container() {
   return (
     <HashRouter>
       <Switch>
-        <Route path='/' component={BrowserHeader} />
-        <Route path='/search-bar' component={SearchBar} />
-        <Route path='/blank' component={Blank} />
+        <Route exact path='/' component={BrowserHeader} />
+        <Route exact path='/search-bar' component={SearchBar} />
+        <Route exact path='/blank' component={Blank} />
       </Switch>
     </HashRouter>
   );
