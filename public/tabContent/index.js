@@ -18,6 +18,9 @@ class TabContent {
     ipcMain.on('select-tab', (event, tabKey) => {
       this.selectTab(tabKey);
     });
+    ipcMain.on('url-change', async (event, url) => {
+      await this.urlChange(url);
+    });
   }
 
   async addTab() {
@@ -41,17 +44,46 @@ class TabContent {
     );
   }
 
-  urlChange(tabKey, url) {}
-
-  removeTab(tabKey) {
-    const restTabList = store.get(STORE_KEY).filter(o => o.key !== tabKey);
-
-    const removeView = this.win
+  async urlChange(url) {
+    const tabKey = store.get(STORE_KEY).find(view => view.active).key;
+    const contentView = this.win
       .getBrowserViews()
       .find(view => view.webContents.id === tabKey);
 
-    if (removeView) {
-      this.win.removeBrowserView(removeView);
+    await contentView.webContents.loadURL(url);
+
+    const title = contentView.webContents.getTitle();
+
+    store.set(
+      STORE_KEY,
+      store.get(STORE_KEY).map(o => {
+        if (o.key === tabKey) {
+          return { ...o, label: title };
+        }
+        return o;
+      })
+    );
+  }
+
+  removeTab(tabKey) {
+    const sKey = store.get(STORE_KEY).find(view => view.key === tabKey).sKey;
+
+    const restTabList = store.get(STORE_KEY).filter(o => o.key !== tabKey);
+
+    const searchView = this.win
+      .getBrowserViews()
+      .find(view => view.webContents.id === sKey);
+
+    const contentView = this.win
+      .getBrowserViews()
+      .find(view => view.webContents.id === tabKey);
+
+    if (searchView) {
+      this.win.removeBrowserView(searchView);
+    }
+
+    if (contentView) {
+      this.win.removeBrowserView(contentView);
     }
 
     if (!restTabList.some(o => o.active)) {
@@ -61,13 +93,17 @@ class TabContent {
           return { ...o, active: i === restTabList.length - 1 };
         })
       );
+    } else {
+      store.set(STORE_KEY, restTabList);
     }
-
-    store.set(STORE_KEY, restTabList);
   }
 
   selectTab(tabKey) {
-    const view = this.win
+    const sKey = store.get(STORE_KEY).find(view => view.key === tabKey).sKey;
+    const searchView = this.win
+      .getBrowserViews()
+      .find(view => view.webContents.id === sKey);
+    const contentView = this.win
       .getBrowserViews()
       .find(view => view.webContents.id === tabKey);
 
@@ -75,7 +111,8 @@ class TabContent {
       return { ...o, active: o.key === tabKey };
     });
 
-    this.win.setTopBrowserView(view);
+    this.win.setTopBrowserView(searchView);
+    this.win.setTopBrowserView(contentView);
 
     store.set(STORE_KEY, tabList);
   }
@@ -85,7 +122,8 @@ class TabContent {
 
     const view = createBrowserView({
       webPreferences: {
-        nodeIntegration: true
+        nodeIntegration: true,
+        preload: path.join(__dirname, 'searchPreload.js')
       }
     });
 
@@ -103,6 +141,10 @@ class TabContent {
       width,
       height: height - this.tabHeight
     });
+
+    if (isDev) {
+      view.webContents.openDevTools({ mode: 'detach' });
+    }
 
     return view;
   }

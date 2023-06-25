@@ -36,7 +36,7 @@ function Tabs(props) {
         ))}
       </div>
       <div className='tool-bar'>
-        <div className='add-wrapper' onClick={newTab}>
+        <div className='add-wrapper' onClick={props.add}>
           <PlusOutlined className='plus' />
         </div>
       </div>

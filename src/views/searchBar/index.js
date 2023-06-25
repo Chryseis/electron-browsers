@@ -7,9 +7,19 @@ import {
 } from '@ant-design/icons';
 
 function SearchBar() {
-  const [url, setUrl] = useState(null);
+  const [url, setUrl] = useState('');
 
   const inputEl = useRef(null);
+
+  const onChange = e => {
+    setUrl(e.target.value);
+  };
+
+  const confirmUrl = e => {
+    if (e.code === 'Enter') {
+      window.bridge.urlChange(url);
+    }
+  };
 
   return (
     <div className='search-bar'>
@@ -25,7 +35,13 @@ function SearchBar() {
         </div>
       </div>
       <div className='search-bar__input'>
-        <input ref={inputEl} type='text' />
+        <input
+          ref={inputEl}
+          type='text'
+          value={url}
+          onChange={onChange}
+          onKeyDown={confirmUrl}
+        />
       </div>
     </div>
   );
